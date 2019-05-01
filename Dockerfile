@@ -3,9 +3,9 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/core/sdk:2.2-stretch AS build
 WORKDIR /src
-COPY ["src/SteamOpenIdConnectProxy/SteamOpenIdConnectProxy.csproj", "SteamOpenIdConnectProxy/"]
+COPY ["src/SteamOpenIdConnectProxy.csproj", "SteamOpenIdConnectProxy/"]
 RUN dotnet restore "SteamOpenIdConnectProxy/SteamOpenIdConnectProxy.csproj"
-COPY src/ .
+COPY ["src/", "SteamOpenIdConnectProxy/"]
 WORKDIR "/src/SteamOpenIdConnectProxy"
 RUN dotnet build "SteamOpenIdConnectProxy.csproj" -c Release -o /app
 
