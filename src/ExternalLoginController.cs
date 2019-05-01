@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace SteamOpenIdConnectProxy
 {
     [AllowAnonymous]
+    [Route("[action]")]
     public class ExternalLoginController : Controller
     {
         private readonly SignInManager<IdentityUser> _signInManager;
@@ -27,30 +28,29 @@ namespace SteamOpenIdConnectProxy
 
 
         [HttpGet]
-        [Route("/ExternalLogin")]
-        public async Task<IActionResult> Login(string returnUrl = null)
+        public async Task<IActionResult> ExternalLogin(string returnUrl = null)
         {
             string provider = "Steam";
 
             // Request a redirect to the external login provider.
-            var redirectUrl = "/ExternalLoginCallback?returnUrl=" + Uri.EscapeUriString(returnUrl);
+            var redirectUrl = Url.Action("ExternalLoginCallback", new { returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return new ChallengeResult(provider, properties);
         }
 
         [HttpGet]
-        [Route("/ExternalLoginCallback")]
-        public async Task<IActionResult> Callback(string returnUrl = null, string remoteError = null)
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
             if (remoteError != null)
             {
-                return Content($"Error from external provider: {remoteError}");
+                throw new Exception($"Error from external provider: {remoteError}");
             }
+
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                return Content($"Error loading external login information.");
+                throw new Exception($"Error loading external login information.");
             }
 
             // Sign in the user with this external login provider if the user already has a login.
