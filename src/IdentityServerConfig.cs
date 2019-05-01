@@ -13,7 +13,7 @@ namespace SteamOpenIdConnectProxy
                 ClientId = clientId,
                 ClientName = "Proxy Client",
                 AllowedGrantTypes = GrantTypes.Code,
-
+                RequireConsent = false,
                 ClientSecrets =
                 {
                     new Secret(secret.Sha256())
