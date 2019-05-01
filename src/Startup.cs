@@ -37,6 +37,7 @@ namespace SteamOpenIdConnectProxy
                 .AddAspNetIdentity<IdentityUser>()
                 .AddInMemoryClients(IdentityServerConfig.GetClients(Configuration["OpenID:ClientID"], Configuration["OpenID:ClientSecret"], Configuration["OpenID:RedirectUri"], Configuration["OpenID:PostLogoutRedirectUri"]))
                 .AddInMemoryPersistedGrants()
+                .AddDeveloperSigningCredential(true)
                 .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResources());
 
             services.AddAuthentication()
