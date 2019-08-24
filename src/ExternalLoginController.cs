@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -66,6 +67,8 @@ namespace SteamOpenIdConnectProxy
             var userId = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var user = new IdentityUser { UserName = userName, Id = userId };
+
+            _userManager.UserValidators.Clear();
             var result = await _userManager.CreateAsync(user);
             if (result.Succeeded)
             {
