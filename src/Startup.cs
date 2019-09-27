@@ -28,7 +28,10 @@ namespace SteamOpenIdConnectProxy
             services.AddDbContext<AppInMemoryDbContext>(options => 
                 options.UseInMemoryDatabase("default"));
 
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<IdentityUser, IdentityRole>(options =>
+                {
+                    options.User.AllowedUserNameCharacters = null;
+                })
                 .AddEntityFrameworkStores<AppInMemoryDbContext>()
                 .AddDefaultTokenProviders();
 
