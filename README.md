@@ -1,4 +1,4 @@
-# SteamOpenIdConnectProvider
+# Steam OpenId Connect Provider
 Steam OpenID 2.0 -> OpenID Connect Provider Proxy
 
 ## About
