@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace SteamOpenIdConnectProxy
+namespace SteamOpenIdConnectProvider
 {
     public class Startup
     {
@@ -50,6 +51,9 @@ namespace SteamOpenIdConnectProxy
                 {
                     options.ApplicationKey = Configuration["Authentication:Steam:ApplicationKey"];
                 });
+
+            services.AddHealthChecks()
+                .AddUrlGroup(new Uri("https://steamcommunity.com/openid"), "Steam");
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -64,6 +68,7 @@ namespace SteamOpenIdConnectProxy
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
             });
         }
     }

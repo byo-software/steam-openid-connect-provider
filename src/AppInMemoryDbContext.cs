@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace SteamOpenIdConnectProxy
+namespace SteamOpenIdConnectProvider
 {
     // This is completely in-memory, we do not need a persistent store.
     public class AppInMemoryDbContext : IdentityDbContext<IdentityUser>

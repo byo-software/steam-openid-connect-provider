@@ -4,7 +4,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 
-namespace SteamOpenIdConnectProxy
+namespace SteamOpenIdConnectProvider
 {
     public class Program
     {

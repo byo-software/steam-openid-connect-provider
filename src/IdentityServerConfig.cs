@@ -2,7 +2,7 @@
 using IdentityServer4;
 using IdentityServer4.Models;
 
-namespace SteamOpenIdConnectProxy
+namespace SteamOpenIdConnectProvider
 {
     public class IdentityServerConfig
     {
@@ -38,7 +38,7 @@ namespace SteamOpenIdConnectProxy
             return new List<IdentityResource>
             {
                 new IdentityResources.OpenId(),
-                new IdentityResources.Profile(),
+                new IdentityResources.Profile()
             };
         }
     }
