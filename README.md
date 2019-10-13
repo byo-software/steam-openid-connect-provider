@@ -14,6 +14,9 @@ Add your Steam API Key as user-secrets like this:
 
 After that set up your redirect URI, ClientID and ClientSecret in the appsettings.json.
 
+## Health checks
+This service contains a health check endpoint at `/health`. It checks if the Steam login server is up.
+
 ## Docker
 [A docker image](https://hub.docker.com/r/imperialplugins/steam-openid-connect-provider) is also available.
 
