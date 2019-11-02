@@ -1,4 +1,4 @@
-# SteamOpenIdConnectProvider
+# Steam OpenId Connect Provider
 Steam OpenID 2.0 -> OpenID Connect Provider Proxy
 
 ## About
@@ -13,6 +13,9 @@ Add your Steam API Key as user-secrets like this:
 `dotnet user-secrets set "Authentication:Steam:ApplicationKey" "MySteamApiKey"`
 
 After that set up your redirect URI, ClientID and ClientSecret in the appsettings.json.
+
+## Health checks
+This service contains a health check endpoint at `/health`. It checks if the Steam login server is up.
 
 ## Docker
 [A docker image](https://hub.docker.com/r/imperialplugins/steam-openid-connect-provider) is also available.
