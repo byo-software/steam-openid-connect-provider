@@ -12,5 +12,5 @@ RUN dotnet publish "SteamOpenIdConnectProvider.csproj" -c Release -o /app
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.0 AS base
 WORKDIR /app
 COPY --from=publish /app .
-HEALTHCHECK CMD curl --fail http://localhost:80/health || exit 1
+HEALTHCHECK CMD curl --fail http://localhost/health || exit 1
 ENTRYPOINT ["dotnet", "SteamOpenIdConnectProvider.dll"]
