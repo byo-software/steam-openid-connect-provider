@@ -1,6 +1,8 @@
 # Steam OpenId Connect Provider
 Steam OpenID 2.0 -> OpenID Connect Provider Proxy
 
+![](https://github.com/neothor/steam-openid-connect-provider/workflows/Docker%20Image%20CI/badge.svg)
+
 ## About
 Steam still uses the old OpenID 2.0 authentication protocol. Since ImperialPlugins.com has migrated to KeyCloak we were unable to migrate our old Steam logins as KeyCloak does not support OpenID 2.0.
 
