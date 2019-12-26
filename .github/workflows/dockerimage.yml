@@ -1,0 +1,29 @@
+name: Docker Image CI
+
+on: [push]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Login to docker hub
+      if: success()
+      uses: actions-hub/docker/login@master
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build image
+      if: success()
+      run: docker build -t neothor/steam-open-id:${IMAGE_TAG} .
+
+    - name: Push to docker registry
+      if: success()
+      uses: actions-hub/docker@master
+      with:
+        args: push neothor/steam-open-id:${IMAGE_TAG}
