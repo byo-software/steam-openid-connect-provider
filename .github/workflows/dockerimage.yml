@@ -10,13 +10,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag neothor/steam-open-id:$(date +%s)
-    - name: Push the Docker image
-      uses: jerray/publish-docker-action@master
+
+    - name: Login to docker hub
+      if: success()
+      uses: actions-hub/docker/login@master
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build image
+      if: success()
+      run: docker build -t neothor/steam-open-id:${IMAGE_TAG} .
+
+    - name: Push to docker registry
+      if: success()
+      uses: actions-hub/docker@master
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        registry: docker.pkg.github.com
-        repository: neothor/steam-open-id
-        auto_tag: true
+        args: push neothor/steam-open-id:${IMAGE_TAG}
