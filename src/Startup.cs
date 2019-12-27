@@ -41,7 +41,11 @@ namespace SteamOpenIdConnectProvider
                     options.UserInteraction.LoginUrl = "/ExternalLogin";
                 })
                 .AddAspNetIdentity<IdentityUser>()
-                .AddInMemoryClients(IdentityServerConfig.GetClients(Configuration["OpenID:ClientID"], Configuration["OpenID:ClientSecret"], Configuration["OpenID:RedirectUri"], Configuration["OpenID:PostLogoutRedirectUri"]))
+                .AddInMemoryClients(IdentityServerConfig.GetClients(
+                    Configuration["OpenID:ClientID"], 
+                    Configuration["OpenID:ClientSecret"], 
+                    Configuration["OpenID:RedirectUri"], 
+                    Configuration["OpenID:PostLogoutRedirectUri"]))
                 .AddInMemoryPersistedGrants()
                 .AddDeveloperSigningCredential(true)
                 .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResources());
@@ -61,6 +65,11 @@ namespace SteamOpenIdConnectProvider
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+
+            if (!string.IsNullOrEmpty(Configuration["Hosting:PathBase"]))
+            {
+                app.UsePathBase(Configuration["Hosting:PathBase"]);
             }
 
             app.UseRouting();
