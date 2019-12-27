@@ -20,7 +20,7 @@ After that set up your redirect URI, ClientID and ClientSecret in the appsetting
 This service contains a health check endpoint at `/health`. It checks if the Steam login server is up.
 
 ## Docker
-[A docker image](https://hub.docker.com/r/imperialplugins/steam-openid-connect-provider) is also available.
+[A docker image](https://hub.docker.com/r/neothor/steam-open-id) is also available.
 
 ```
 docker run -it \
