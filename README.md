@@ -12,6 +12,11 @@ Note: only "openid" and "profile" scopes are supported due limitations by Valve/
 Add your Steam API Key as user-secrets like this:
 `dotnet user-secrets set "Authentication:Steam:ApplicationKey" "MySteamApiKey"`
 
+Alternatively you can set it up via environment variables:
+`-e Authentication__Steam__ApplicationKey: 'Your Steam ApiKey‘`
+(Keep in mind that this is easier but more insecure)
+
+
 After that set up your redirect URI, ClientID and ClientSecret in the appsettings.json.
 
 ## Health checks
@@ -25,7 +30,7 @@ docker run -it \
     -e OpenID__RedirectUri=http://localhost:8080/auth/realms/master/broker/steam/endpoint \
     -e OpenID__ClientID=steamidp \ 
     -e OpenID__ClientSecret=mysecret \
-	-e Authentication__Steam__ApplicationKey=MySteamApiKey \
+    -e Authentication__Steam__ApplicationKey=MySteamApiKey \
     --restart unless-stopped \
     --name steamidp \
     imperialplugins/steam-openid-connect-provider
