@@ -26,7 +26,8 @@ namespace SteamOpenIdConnectProvider
                 .AddNewtonsoftJson()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
-            services.AddDbContext<AppInMemoryDbContext>(options => 
+
+            services.AddDbContext<AppInMemoryDbContext>(options =>
                 options.UseInMemoryDatabase("default"));
 
             services.AddIdentity<IdentityUser, IdentityRole>(options =>
@@ -39,9 +40,12 @@ namespace SteamOpenIdConnectProvider
             services.AddIdentityServer(options =>
                 {
                     options.UserInteraction.LoginUrl = "/ExternalLogin";
+                    options.PublicOrigin = Configuration["OpenID:PublicOrigin"];
                 })
                 .AddAspNetIdentity<IdentityUser>()
-                .AddInMemoryClients(IdentityServerConfig.GetClients(Configuration["OpenID:ClientID"], Configuration["OpenID:ClientSecret"], Configuration["OpenID:RedirectUri"], Configuration["OpenID:PostLogoutRedirectUri"]))
+                .AddInMemoryClients(IdentityServerConfig.GetClients(Configuration["OpenID:ClientID"],
+                    Configuration["OpenID:ClientSecret"], Configuration["OpenID:RedirectUri"],
+                    Configuration["OpenID:PostLogoutRedirectUri"]))
                 .AddInMemoryPersistedGrants()
                 .AddDeveloperSigningCredential(true)
                 .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResources());
