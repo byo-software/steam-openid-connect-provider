@@ -16,7 +16,6 @@ Alternatively you can set it up via environment variables:
 `-e Authentication__Steam__ApplicationKey: 'Your Steam ApiKey‘`
 (Keep in mind that this is easier but more insecure)
 
-
 After that set up your redirect URI, ClientID and ClientSecret in the appsettings.json.
 
 ## OpenID Configuration
@@ -24,14 +23,14 @@ You can access Authorization and Token endpoint details in
 http://<Your Host>/.well-known/openid-configuration
 
 ## HTTPS Support
-This server does not support https connections. If you want to use https connections please reverse proxy like nginx.
+This server does not support https connections. If you want to use https connections please use a reverse proxy like nginx.
 
 ## Running behind reverse proxies
-Some reverse proxy set ups might require a special set up, like setting the path base or origin manually.
+Some reverse proxy setups might require additional configuration, like setting the path base or origin.
 
-To set the origin, set `Hosting:PublicOrigin` in your configuration or the `Hosting__PublicOrigin` environment variable to your desired origin. If not set, the origin name is inferred from the request.
+To set the origin, set `Hosting:PublicOrigin` in the appsettings.json or the `Hosting__PublicOrigin` environment variable to your desired origin. If not set, the origin name is inferred from the request.
 
-Similary, to set the path base, you can set `Hosting:PathBase` or the `Hosting__PathBase` environment variable. If not set, it will default to "/".
+Similary, you can use the `Hosting:PathBase` in the appsettings.json or the `Hosting__PathBase` environment variable to set the path base. If not set, it will default to "/".
 
 ## Health checks
 This service contains a health check endpoint at `/health`. It checks if the Steam login server is up.
