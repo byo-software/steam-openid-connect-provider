@@ -1,6 +1,8 @@
 # Steam OpenId Connect Provider
 Steam OpenID 2.0 -> OpenID Connect Provider Proxy
 
+![](https://github.com/neothor/steam-openid-connect-provider/workflows/Docker%20Image%20CI/badge.svg)
+
 ## About
 Steam still uses the old OpenID 2.0 authentication protocol. Since ImperialPlugins.com has migrated to KeyCloak we were unable to migrate our old Steam logins as KeyCloak does not support OpenID 2.0.
 
@@ -23,7 +25,7 @@ After that set up your redirect URI, ClientID and ClientSecret in the appsetting
 This service contains a health check endpoint at `/health`. It checks if the Steam login server is up.
 
 ## Docker
-[A docker image](https://hub.docker.com/r/imperialplugins/steam-openid-connect-provider) is also available.
+[A docker image](https://hub.docker.com/r/neothor/steam-open-id) is also available.
 
 ```
 docker run -it \
