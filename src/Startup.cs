@@ -39,6 +39,7 @@ namespace SteamOpenIdConnectProvider
             services.AddIdentityServer(options =>
                 {
                     options.UserInteraction.LoginUrl = "/ExternalLogin";
+                    options.PublicOrigin = Configuration["OpenID:PublicOrigin"];
                 })
                 .AddAspNetIdentity<IdentityUser>()
                 .AddInMemoryClients(IdentityServerConfig.GetClients(
