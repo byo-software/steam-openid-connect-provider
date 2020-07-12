@@ -19,6 +19,10 @@ Alternatively you can set it up via environment variables:
 
 After that set up your redirect URI, ClientID and ClientSecret in the appsettings.json.
 
+## OpenID Configuration
+You can access Authorization and Token endpoint details in
+http://<Your Host>/.well-known/openid-configuration
+
 ## Health checks
 This service contains a health check endpoint at `/health`. It checks if the Steam login server is up.
 
