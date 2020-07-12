@@ -20,7 +20,7 @@ After that set up your redirect URI, ClientID and ClientSecret in the appsetting
 
 ## OpenID Configuration
 You can access Authorization and Token endpoint details in
-http://<Your Host>/.well-known/openid-configuration
+`http://<Your Host>/.well-known/openid-configuration`
 
 ## HTTPS Support
 This server does not support https connections. If you want to use https connections please use a reverse proxy like nginx.
