@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -52,6 +53,11 @@ namespace SteamOpenIdConnectProvider
                 .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResources());
 
             services.AddAuthentication()
+                .AddCookie(options =>
+                {
+                    options.Cookie.SameSite = SameSiteMode.Strict;
+                    options.Cookie.IsEssential = true;
+                })
                 .AddSteam(options =>
                 {
                     options.ApplicationKey = Configuration["Authentication:Steam:ApplicationKey"];
