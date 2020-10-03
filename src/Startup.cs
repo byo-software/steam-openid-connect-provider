@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using IdentityServer4.Services;
+using IdentityServer.Services;
 
 namespace SteamOpenIdConnectProvider
 {
@@ -26,6 +28,8 @@ namespace SteamOpenIdConnectProvider
             services.AddControllers()
                 .AddNewtonsoftJson()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            
+            services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddDbContext<AppInMemoryDbContext>(options => 
                 options.UseInMemoryDatabase("default"));
@@ -51,6 +55,8 @@ namespace SteamOpenIdConnectProvider
                 .AddInMemoryPersistedGrants()
                 .AddDeveloperSigningCredential(true)
                 .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResources());
+                
+            services.AddScoped<IProfileService, ProfileService>();
 
             services.AddAuthentication()
                 .AddCookie(options =>
