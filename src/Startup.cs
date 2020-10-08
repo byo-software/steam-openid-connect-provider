@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -24,15 +25,14 @@ namespace SteamOpenIdConnectProvider
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers()
                 .AddNewtonsoftJson()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            
+
             services.AddSingleton(Configuration);
-            services.AddDbContext<AppInMemoryDbContext>(options => 
+            services.AddDbContext<AppInMemoryDbContext>(options =>
                 options.UseInMemoryDatabase("default"));
 
             services.AddIdentity<IdentityUser, IdentityRole>(options =>
@@ -45,18 +45,17 @@ namespace SteamOpenIdConnectProvider
             services.AddIdentityServer(options =>
                 {
                     options.UserInteraction.LoginUrl = "/ExternalLogin";
-                    options.PublicOrigin = Configuration["Hosting:PublicOrigin"];
                 })
                 .AddAspNetIdentity<IdentityUser>()
                 .AddInMemoryClients(IdentityServerConfig.GetClients(
-                    Configuration["OpenID:ClientID"], 
-                    Configuration["OpenID:ClientSecret"], 
-                    Configuration["OpenID:RedirectUri"], 
+                    Configuration["OpenID:ClientID"],
+                    Configuration["OpenID:ClientSecret"],
+                    Configuration["OpenID:RedirectUri"],
                     Configuration["OpenID:PostLogoutRedirectUri"]))
                 .AddInMemoryPersistedGrants()
                 .AddDeveloperSigningCredential(true)
                 .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResources());
-                
+
             services.AddHttpClient<IProfileService, SteamProfileService>();
 
             services.AddAuthentication()
@@ -85,6 +84,18 @@ namespace SteamOpenIdConnectProvider
             {
                 app.UsePathBase(Configuration["Hosting:PathBase"]);
             }
+
+            app.UseCookiePolicy();
+            app.Use(async (ctx, next) =>
+            {
+                var origin = Configuration["Hosting:PublicOrigin"];
+                if (!string.IsNullOrEmpty(origin))
+                {
+                    ctx.SetIdentityServerOrigin(origin);
+                }
+
+                await next();
+            });
 
             app.UseRouting();
             app.UseIdentityServer();
