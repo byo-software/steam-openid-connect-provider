@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace SteamOpenIdConnectProvider
+namespace SteamOpenIdConnectProvider.Controllers
 {
     [AllowAnonymous]
     [Route("[action]")]
@@ -28,20 +28,20 @@ namespace SteamOpenIdConnectProvider
 
 
         [HttpGet]
-        public async Task<IActionResult> ExternalLogin(string returnUrl = null)
+        public Task<IActionResult> ExternalLogin(string returnUrl = null)
         {
-            string provider = "Steam";
+            const string provider = "Steam";
 
-            // Request a redirect to the external login provider.
             var redirectUrl = Url.Action("ExternalLoginCallback", new { returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return new ChallengeResult(provider, properties);
+            return Task.FromResult<IActionResult>(new ChallengeResult(provider, properties));
         }
 
         [HttpGet]
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
-            returnUrl = returnUrl ?? Url.Content("~/");
+            returnUrl ??= Url.Content("~/");
+           
             if (remoteError != null)
             {
                 throw new Exception($"Error from external provider: {remoteError}");
@@ -53,7 +53,6 @@ namespace SteamOpenIdConnectProvider
                 throw new Exception($"Error loading external login information.");
             }
 
-            // Sign in the user with this external login provider if the user already has a login.
             var externalLoginResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (externalLoginResult.Succeeded)
             {
@@ -61,13 +60,13 @@ namespace SteamOpenIdConnectProvider
                 return LocalRedirect(returnUrl);
             }
 
-
             var userName = info.Principal.FindFirstValue(ClaimTypes.Name);
             var userId = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
-
+            
             var user = new IdentityUser { UserName = userName, Id = userId };
 
             _userManager.UserValidators.Clear();
+
             var result = await _userManager.CreateAsync(user);
             if (result.Succeeded)
             {

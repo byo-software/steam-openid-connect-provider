@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using IdentityServer4.Services;
-using IdentityServer.Services;
+using SteamOpenIdConnectProvider.Database;
+using SteamOpenIdConnectProvider.Profile;
 
 namespace SteamOpenIdConnectProvider
 {
@@ -29,8 +31,7 @@ namespace SteamOpenIdConnectProvider
                 .AddNewtonsoftJson()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             
-            services.AddSingleton<IConfiguration>(Configuration);
-
+            services.AddSingleton(Configuration);
             services.AddDbContext<AppInMemoryDbContext>(options => 
                 options.UseInMemoryDatabase("default"));
 
@@ -56,7 +57,7 @@ namespace SteamOpenIdConnectProvider
                 .AddDeveloperSigningCredential(true)
                 .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResources());
                 
-            services.AddScoped<IProfileService, ProfileService>();
+            services.AddHttpClient<IProfileService, SteamProfileService>();
 
             services.AddAuthentication()
                 .AddCookie(options =>
