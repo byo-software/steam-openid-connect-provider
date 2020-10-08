@@ -2,18 +2,14 @@
 Steam OpenID 2.0 -> OpenID Connect Provider Proxy
 
 ## About
-Steam still uses the old OpenID 2.0 authentication protocol. Since ImperialPlugins.com has migrated to KeyCloak we were unable to migrate our old Steam logins as KeyCloak does not support OpenID 2.0.
-
-This server will act as an OpenID Connect provider which will provide Steam authentication for you. This way you can use Steam logins in KeyCloak or any other OpenID Connect based authentication client. 
-
-Note: only "openid" and "profile" scopes are supported due limitations by Valve/Steam.
+This server allows you to use Steam as an OpenID Connect Identity provider (OIDC IDP). This way you can use Steam logins in KeyCloak or any other OpenID Connect based authentication client. 
 
 ## Setup
 Add your Steam API Key as user-secrets like this:
 `dotnet user-secrets set "Authentication:Steam:ApplicationKey" "MySteamApiKey"`
 
 Alternatively you can set it up via environment variables:
-`-e Authentication__Steam__ApplicationKey: 'Your Steam ApiKey‘`
+`Authentication__Steam__ApplicationKey=MySteamApiKey`
 (Keep in mind that this is easier but more insecure)
 
 After that set up your redirect URI, ClientID and ClientSecret in the appsettings.json.
@@ -21,6 +17,11 @@ After that set up your redirect URI, ClientID and ClientSecret in the appsetting
 ## OpenID Configuration
 You can access Authorization and Token endpoint details in
 `http://<Your Host>/.well-known/openid-configuration`
+
+## Supported Scopes
+The following scopes are supported: `openid`, `profile`.
+
+If you use the `profile` scope, you get access to the `picture`, `given_name`, `website` and `nickname` claims too.
 
 ## HTTPS Support
 This server does not support https connections. If you want to use https connections please use a reverse proxy like nginx.
@@ -33,7 +34,7 @@ To set the origin, set `Hosting:PublicOrigin` in the appsettings.json or the `Ho
 Similary, you can use the `Hosting:PathBase` in the appsettings.json or the `Hosting__PathBase` environment variable to set the path base. If not set, it will default to "/".
 
 ## Health checks
-This service contains a health check endpoint at `/health`. It checks if the Steam login server is up.
+This service contains a health check endpoint at `/health`. It checks if the Steam login servers are working.
 
 ## Docker
 [A docker image](https://hub.docker.com/r/imperialplugins/steam-openid-connect-provider) is also available.
