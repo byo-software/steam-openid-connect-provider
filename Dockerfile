@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 WORKDIR /src
 COPY ["src/SteamOpenIdConnectProvider.csproj", "SteamOpenIdConnectProvider/"]
 RUN dotnet restore "SteamOpenIdConnectProvider/SteamOpenIdConnectProvider.csproj"
@@ -9,7 +9,7 @@ RUN dotnet build "SteamOpenIdConnectProvider.csproj" -c Release -o /app
 FROM build AS publish
 RUN dotnet publish "SteamOpenIdConnectProvider.csproj" -c Release -o /app
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.0 AS base
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 AS base
 WORKDIR /app
 COPY --from=publish /app .
 EXPOSE 80
