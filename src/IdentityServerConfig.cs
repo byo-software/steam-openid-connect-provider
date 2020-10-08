@@ -24,7 +24,7 @@ namespace SteamOpenIdConnectProvider
 
                 // where to redirect to after logout
                 PostLogoutRedirectUris = { logoutRedirectUri },
-
+                RequirePkce = false,
                 AllowedScopes = new List<string>
                 {
                     IdentityServerConstants.StandardScopes.OpenId,
