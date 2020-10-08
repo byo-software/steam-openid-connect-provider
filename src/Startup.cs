@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using IdentityServer4.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 using SteamOpenIdConnectProvider.Database;
 using SteamOpenIdConnectProvider.Profile;
 
@@ -97,6 +98,16 @@ namespace SteamOpenIdConnectProvider
                 await next();
             });
 
+            var forwardOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+                RequireHeaderSymmetry = false
+            };
+
+            forwardOptions.KnownNetworks.Clear();
+            forwardOptions.KnownProxies.Clear();
+
+            app.UseForwardedHeaders(forwardOptions);
             app.UseRouting();
             app.UseIdentityServer();
             app.UseEndpoints(endpoints =>
