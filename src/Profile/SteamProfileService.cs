@@ -61,13 +61,21 @@ namespace SteamOpenIdConnectProvider.Profile
 
             if (player != null)
             {
-                claims.Add(new Claim("picture", player.AvatarFull));
-                claims.Add(new Claim("nickname", player.PersonaName));
-                claims.Add(new Claim("given_name", player.RealName));
-                claims.Add(new Claim("website", player.ProfileUrl));
+                AddClaim(claims, "picture", player.AvatarFull);
+                AddClaim(claims, "nickname", player.PersonaName);
+                AddClaim(claims, "given_name", player.RealName);
+                AddClaim(claims, "website", player.ProfileUrl);
             }
 
             context.IssuedClaims = claims;
+        }
+
+        private void AddClaim(List<Claim> claims, string type, string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                claims.Add(new Claim(type, value));
+            }
         }
 
         public async Task IsActiveAsync(IsActiveContext context)
