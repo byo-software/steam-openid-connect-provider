@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;  
+using System.Collections.Generic;
+using System.Linq;  
 using IdentityServer4;
 using IdentityServer4.Models;
 
@@ -20,7 +22,7 @@ namespace SteamOpenIdConnectProvider
                 },
 
                 // where to redirect to after login
-                RedirectUris = { redirectUri },
+                RedirectUris = redirectUri.Split(",").Select(x => x.Trim()).ToArray(),
 
                 // where to redirect to after logout
                 PostLogoutRedirectUris = { logoutRedirectUri },
