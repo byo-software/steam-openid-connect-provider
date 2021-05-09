@@ -1,58 +1,59 @@
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SteamOpenIdConnectProvider.Profile.Models
 {
     public sealed class Player
     {
-        [JsonProperty("steamid")]
+        [JsonPropertyName("steamid")]
         public ulong SteamId { get; set; }
 
-        [JsonProperty("communityvisibilitystate")]
+        [JsonPropertyName("communityvisibilitystate")]
         public int CommunityVisibilityState { get; set; }
 
-        [JsonProperty("profilestate")]
+        [JsonPropertyName("profilestate")]
         public int ProfileState { get; set; }
 
-        [JsonProperty("personaname")]
+        [JsonPropertyName("personaname")]
         public string PersonaName { get; set; }
 
-        [JsonProperty("commentpermission")]
+        [JsonPropertyName("commentpermission")]
         public int CommentPermission { get; set; }
 
-        [JsonProperty("profileurl")]
+        [JsonPropertyName("profileurl")]
         public string ProfileUrl { get; set; }
 
-        [JsonProperty("avatar")]
+        [JsonPropertyName("avatar")]
         public string Avatar { get; set; }
 
-        [JsonProperty("avatarmedium")]
+        [JsonPropertyName("avatarmedium")]
         public string AvatarMedium { get; set; }
 
-        [JsonProperty("avatarfull")]
+        [JsonPropertyName("avatarfull")]
         public string AvatarFull { get; set; }
 
-        [JsonProperty("avatarhash")]
+        [JsonPropertyName("avatarhash")]
         public string AvatarHash { get; set; }
 
-        [JsonProperty("lastlogoff")]
+        [JsonPropertyName("lastlogoff")]
         public int LastLogoff { get; set; }
 
-        [JsonProperty("personastate")]
+        [JsonPropertyName("personastate")]
         public int PersonaState { get; set; }
 
-        [JsonProperty("realname")]
+        [JsonPropertyName("realname")]
         public string RealName { get; set; }
 
-        [JsonProperty("primaryclanid")]
+        [JsonPropertyName("primaryclanid")]
         public ulong PrimaryClanId { get; set; }
 
-        [JsonProperty("timecreated")]
+        [JsonPropertyName("timecreated")]
         public int TimeCreated { get; set; }
 
-        [JsonProperty("personastateflags")]
+        [JsonPropertyName("personastateflags")]
         public int PersonaStateFlags { get; set; }
 
-        [JsonProperty("loccountrycode")]
+        [JsonPropertyName("loccountrycode")]
         public string LocCountryCode { get; set; }
     }
 }

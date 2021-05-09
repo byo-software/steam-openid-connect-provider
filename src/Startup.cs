@@ -29,7 +29,6 @@ namespace SteamOpenIdConnectProvider
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers()
-                .AddNewtonsoftJson()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddSingleton(Configuration);

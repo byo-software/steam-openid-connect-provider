@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using SteamOpenIdConnectProvider.Profile.Models;
 
 namespace SteamOpenIdConnectProvider.Profile
@@ -28,7 +28,7 @@ namespace SteamOpenIdConnectProvider.Profile
             var url = $"{baseurl}/?key={applicationKey}&steamids={string.Join(',', steamIds)}";
 
             var res = await _httpClient.GetStringAsync(url);
-            var response = JsonConvert.DeserializeObject<SteamResponse<GetPlayerSummariesResponse>>(res);
+            var response = JsonSerializer.Deserialize<SteamResponse<GetPlayerSummariesResponse>>(res);
             return response.Response;
         }
 
