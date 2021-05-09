@@ -41,7 +41,7 @@ namespace SteamOpenIdConnectProvider.Controllers
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
             returnUrl ??= Url.Content("~/");
-           
+
             if (remoteError != null)
             {
                 throw new Exception($"Error from external provider: {remoteError}");
@@ -62,7 +62,7 @@ namespace SteamOpenIdConnectProvider.Controllers
 
             var userName = info.Principal.FindFirstValue(ClaimTypes.Name);
             var userId = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             var user = new IdentityUser { UserName = userName, Id = userId };
 
             _userManager.UserValidators.Clear();

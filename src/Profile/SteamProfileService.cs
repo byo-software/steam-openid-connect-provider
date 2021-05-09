@@ -35,7 +35,7 @@ namespace SteamOpenIdConnectProvider.Profile
         public SteamProfileService(
             UserManager<IdentityUser> userManager,
             IUserClaimsPrincipalFactory<IdentityUser> claimsFactory,
-            IConfiguration configuration, 
+            IConfiguration configuration,
             HttpClient httpClient)
         {
             _userManager = userManager;
