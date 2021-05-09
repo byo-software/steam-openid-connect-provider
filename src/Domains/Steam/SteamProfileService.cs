@@ -8,39 +8,28 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using SteamOpenIdConnectProvider.Profile.Models;
+using Microsoft.Extensions.Options;
+using SteamOpenIdConnectProvider.Domains.Steam;
+using SteamOpenIdConnectProvider.Models.Steam;
 
-namespace SteamOpenIdConnectProvider.Profile
+namespace SteamOpenIdConnectProvider.Services
 {
     public class SteamProfileService : IProfileService
     {
         private readonly HttpClient _httpClient;
-        private readonly IConfiguration _configuration;
+        private readonly SteamConfig _config;
         private readonly IUserClaimsPrincipalFactory<IdentityUser> _claimsFactory;
         private readonly UserManager<IdentityUser> _userManager;
-
-        private async Task<GetPlayerSummariesResponse> GetPlayerSummariesAsync(IEnumerable<string> steamIds)
-        {
-            const string baseurl = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002";
-
-            var applicationKey = _configuration["Authentication:Steam:ApplicationKey"];
-            var url = $"{baseurl}/?key={applicationKey}&steamids={string.Join(',', steamIds)}";
-
-            var res = await _httpClient.GetStringAsync(url);
-            var response = JsonSerializer.Deserialize<SteamResponse<GetPlayerSummariesResponse>>(res);
-            return response.Response;
-        }
 
         public SteamProfileService(
             UserManager<IdentityUser> userManager,
             IUserClaimsPrincipalFactory<IdentityUser> claimsFactory,
-            IConfiguration configuration,
+            IOptions<SteamConfig> config,
             HttpClient httpClient)
         {
             _userManager = userManager;
             _claimsFactory = claimsFactory;
-            _configuration = configuration;
+            _config = config.Value;
             _httpClient = httpClient;
         }
 
@@ -53,8 +42,7 @@ namespace SteamOpenIdConnectProvider.Profile
             var claims = principal.Claims.ToList();
             claims = claims.Where(claim => context.RequestedClaimTypes.Contains(claim.Type)).ToList();
 
-            const string steamUrl = "https://steamcommunity.com/openid/id/";
-            var steamId = sub.Substring(steamUrl.Length);
+            var steamId = sub.Substring(Constants.OpenIdUrl.Length);
 
             var userSummary = await GetPlayerSummariesAsync(new[] { steamId });
             var player = userSummary.Players.FirstOrDefault();
@@ -70,6 +58,13 @@ namespace SteamOpenIdConnectProvider.Profile
             context.IssuedClaims = claims;
         }
 
+        public async Task IsActiveAsync(IsActiveContext context)
+        {
+            var sub = context.Subject.GetSubjectId();
+            var user = await _userManager.FindByIdAsync(sub);
+            context.IsActive = user != null;
+        }
+
         private void AddClaim(List<Claim> claims, string type, string value)
         {
             if (!string.IsNullOrEmpty(value))
@@ -78,11 +73,12 @@ namespace SteamOpenIdConnectProvider.Profile
             }
         }
 
-        public async Task IsActiveAsync(IsActiveContext context)
+        private async Task<GetPlayerSummariesResponse> GetPlayerSummariesAsync(IEnumerable<string> steamIds)
         {
-            var sub = context.Subject.GetSubjectId();
-            var user = await _userManager.FindByIdAsync(sub);
-            context.IsActive = user != null;
+            var url = $"{Constants.GetPlayerSummariesUrl}/?key={_config.ApplicationKey}&steamids={string.Join(',', steamIds)}";
+            var res = await _httpClient.GetStringAsync(url);
+            var response = JsonSerializer.Deserialize<SteamResponse<GetPlayerSummariesResponse>>(res);
+            return response.Response;
         }
     }
 }

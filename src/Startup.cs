@@ -12,8 +12,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.HttpOverrides;
-using SteamOpenIdConnectProvider.Database;
-using SteamOpenIdConnectProvider.Profile;
+using SteamOpenIdConnectProvider.Services;
+using SteamOpenIdConnectProvider.Models.IdentityServer;
+using SteamOpenIdConnectProvider.Domains.Common;
+using SteamOpenIdConnectProvider.Domains.IdentityServer;
+using SteamOpenIdConnectProvider.Domains.Steam;
 
 namespace SteamOpenIdConnectProvider
 {
@@ -31,7 +34,6 @@ namespace SteamOpenIdConnectProvider
             services.AddControllers()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
-            services.AddSingleton(Configuration);
             services.AddDbContext<AppInMemoryDbContext>(options =>
                 options.UseInMemoryDatabase("default"));
 
@@ -42,21 +44,21 @@ namespace SteamOpenIdConnectProvider
                 .AddEntityFrameworkStores<AppInMemoryDbContext>()
                 .AddDefaultTokenProviders();
 
+            var openIdConfig = Configuration.GetSection(OpenIdConfig.Key).Get<OpenIdConfig>();
             services.AddIdentityServer(options =>
                 {
                     options.UserInteraction.LoginUrl = "/ExternalLogin";
                 })
                 .AddAspNetIdentity<IdentityUser>()
-                .AddInMemoryClients(IdentityServerConfig.GetClients(
-                    Configuration["OpenID:ClientID"],
-                    Configuration["OpenID:ClientSecret"],
-                    Configuration["OpenID:RedirectUri"],
-                    Configuration["OpenID:PostLogoutRedirectUri"]))
+                .AddInMemoryClients(IdentityServerConfigFactory.GetClients(openIdConfig))
                 .AddInMemoryPersistedGrants()
                 .AddDeveloperSigningCredential(true)
-                .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResources());
+                .AddInMemoryIdentityResources(IdentityServerConfigFactory.GetIdentityResources());
 
-            services.AddHttpClient<IProfileService, SteamProfileService>();
+            var steamConfig = Configuration.GetSection(SteamConfig.Key).Get<SteamConfig>();
+            services
+                .Configure<SteamConfig>(Configuration.GetSection(SteamConfig.Key))
+                .AddHttpClient<IProfileService, SteamProfileService>();
 
             services.AddAuthentication()
                 .AddCookie(options =>
@@ -66,7 +68,7 @@ namespace SteamOpenIdConnectProvider
                 })
                 .AddSteam(options =>
                 {
-                    options.ApplicationKey = Configuration["Authentication:Steam:ApplicationKey"];
+                    options.ApplicationKey = steamConfig.ApplicationKey;
                 });
 
             services.AddHealthChecks()
@@ -80,18 +82,18 @@ namespace SteamOpenIdConnectProvider
                 app.UseDeveloperExceptionPage();
             }
 
-            if (!string.IsNullOrEmpty(Configuration["Hosting:PathBase"]))
+            var hostingConfig = Configuration.GetSection(HostingConfig.Key).Get<HostingConfig>();
+            if (!string.IsNullOrEmpty(hostingConfig.BasePath))
             {
-                app.UsePathBase(Configuration["Hosting:PathBase"]);
+                app.UsePathBase(hostingConfig.BasePath);
             }
 
             app.UseCookiePolicy();
             app.Use(async (ctx, next) =>
             {
-                var origin = Configuration["Hosting:PublicOrigin"];
-                if (!string.IsNullOrEmpty(origin))
+                if (!string.IsNullOrEmpty(hostingConfig.PublicOrigin))
                 {
-                    ctx.SetIdentityServerOrigin(origin);
+                    ctx.SetIdentityServerOrigin(hostingConfig.PublicOrigin);
                 }
 
                 await next();

@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace SteamOpenIdConnectProvider.Profile.Models
+namespace SteamOpenIdConnectProvider.Models.Steam
 {
     public sealed class SteamResponse<T>
     {

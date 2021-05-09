@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace SteamOpenIdConnectProvider.Database
+namespace SteamOpenIdConnectProvider.Domains.IdentityServer
 {
     // This is completely in-memory, we do not need a persistent store.
     public class AppInMemoryDbContext : IdentityDbContext<IdentityUser>
