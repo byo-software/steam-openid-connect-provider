@@ -10,7 +10,7 @@ services:
             - 8080:8080
     
     steamidp:
-        image: neothor/steam-openid-connect-provider
+        image: neothor/steam-openid-connect-provider:develop
         build: ./src
         container_name: steamidp
         ports: 

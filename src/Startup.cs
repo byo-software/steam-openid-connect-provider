@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Http;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -72,7 +71,7 @@ namespace SteamOpenIdConnectProvider
                 });
 
             services.AddHealthChecks()
-                .AddUrlGroup(new Uri("https://steamcommunity.com/openid"), "Steam");
+                .AddUrlGroup(new Uri(Constants.OpenIdUrl), "Steam");
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
