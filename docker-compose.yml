@@ -6,6 +6,11 @@
 #         volumes: 
 #             - "<your-certs>/dev.local.crt:/tmp/dev.local.crt"
 #             - "<your-certs>/dev.local.key:/tmp/dev.local.key"
+#  
+#     keycloak:
+#         volumes: 
+#             - "<your-certs>/dev.local.crt:/tmp/dev.local.crt"
+#             
 #     steamidp:
 #         environment: 
 #             Steam__ApplicationKey: <your-app-key>
@@ -19,10 +24,9 @@ volumes:
 
 services: 
     proxy:
-        image: nginx
+        image: neothor/proxy:develop
+        build: ./develop/proxy
         container_name: proxy
-        volumes: 
-            - "./proxy_ssl.conf:/etc/nginx/conf.d/proxy_ssl.conf"
         ports:
             - 443:443
         links:
@@ -40,7 +44,8 @@ services:
           POSTGRES_PASSWORD: password
 
     keycloak:
-        image: jboss/keycloak
+        image: neothor/keycloak:develop
+        build: ./develop/keycloak
         container_name: keycloak
         environment: 
             DB_VENDOR: POSTGRES
@@ -56,7 +61,6 @@ services:
             - postgres    
         extra_hosts:
             - "dev.local:host-gateway"
-            
     
     steamidp:
         image: neothor/steam-openid-connect-provider:develop
