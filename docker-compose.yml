@@ -1,9 +1,34 @@
+# Create the file docker-compose.secrets.yml and add
+# ```
+# version: '2'
+# services: 
+#     proxy:
+#         volumes: 
+#             - "<your-certs>/dev.local.crt:/tmp/dev.local.crt"
+#             - "<your-certs>/dev.local.key:/tmp/dev.local.key"
+#     steamidp:
+#         environment: 
+#             Steam__ApplicationKey: <your-app-key>
+# ```
+#
+# Than start with `docker compose -f .\docker-compose.yml -f .\docker-compose.secrets.yml up`
 version: '2'
 volumes:
     postgres_data:
         driver: local
 
 services: 
+    proxy:
+        image: nginx
+        container_name: proxy
+        volumes: 
+            - "./proxy_ssl.conf:/etc/nginx/conf.d/proxy_ssl.conf"
+        ports:
+            - 443:443
+        links:
+            - keycloak
+            - steamidp
+
     postgres:
         image: postgres
         container_name: postgres
@@ -26,16 +51,22 @@ services:
             DB_PASSWORD: password
             KEYCLOAK_USER: admin 
             KEYCLOAK_PASSWORD: changeit
-        ports:
-            - 8080:8080
+            PROXY_ADDRESS_FORWARDING: "true"
         links:
-            - postgres     
+            - postgres    
+        extra_hosts:
+            - "dev.local:host-gateway"
+            
     
     steamidp:
         image: neothor/steam-openid-connect-provider:develop
         build: ./src
-        container_name: steamidp
-        ports: 
-            - 80:80            
+        container_name: steamidp 
         links:
             - keycloak
+        environment: 
+            OpenID__ClientID: keycloak
+            OpenID__ClientName: keycloak
+            OpenId__ClientSecret: keycloak
+            OpenID__RedirectUri: https://dev.local/auth/realms/dev/broker/steam/endpoint
+            Hosting__BasePath: /steam
