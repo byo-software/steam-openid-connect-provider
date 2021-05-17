@@ -1,7 +1,7 @@
 server {
     listen 443 ssl;
-    ssl_certificate /tmp/dev.local.crt;
-    ssl_certificate_key /tmp/dev.local.key;
+    ssl_certificate ${SSL_CERT};
+    ssl_certificate_key ${SSL_KEY};
 
     proxy_set_header X-Forwarded-For $proxy_protocol_addr;
     proxy_set_header X-Forwarded-Proto $scheme;
@@ -12,10 +12,10 @@ server {
     }
 
     location /auth {
-      proxy_pass http://keycloak:8080;
+      proxy_pass ${KEYCLOAK_URI};
     }
 
     location /steam {
-      proxy_pass http://steamidp:80;
+      proxy_pass ${STEAMIDP_URI};
     }
 }
