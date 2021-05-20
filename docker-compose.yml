@@ -1,22 +1,3 @@
-# Create the file docker-compose.secrets.yml and add
-# ```
-# version: '2'
-# services: 
-#     proxy:
-#         volumes: 
-#             - "<your-certs>/dev.local.crt:/tmp/dev.local.crt"
-#             - "<your-certs>/dev.local.key:/tmp/dev.local.key"
-#  
-#     keycloak:
-#         volumes: 
-#             - "<your-certs>/dev.local.crt:/tmp/dev.local.crt"
-#             
-#     steamidp:
-#         environment: 
-#             Steam__ApplicationKey: <your-app-key>
-# ```
-#
-# Than start with `docker compose -f .\docker-compose.yml -f .\docker-compose.secrets.yml up`
 version: '2'
 volumes:
     postgres_data:

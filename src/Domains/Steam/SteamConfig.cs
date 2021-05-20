@@ -9,6 +9,6 @@ namespace SteamOpenIdConnectProvider.Domains.Steam
     {
         public static readonly string Key = "Steam";
 
-        public string ApplicationKey { get; internal set; }
+        public string ApplicationKey { get; set; }
     }
 }

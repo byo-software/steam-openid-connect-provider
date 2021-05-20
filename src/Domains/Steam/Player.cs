@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SteamOpenIdConnectProvider.Profile.Models
@@ -6,7 +6,7 @@ namespace SteamOpenIdConnectProvider.Profile.Models
     public sealed class Player
     {
         [JsonPropertyName("steamid")]
-        public ulong SteamId { get; set; }
+        public string SteamId { get; set; }
 
         [JsonPropertyName("communityvisibilitystate")]
         public int CommunityVisibilityState { get; set; }
@@ -45,7 +45,7 @@ namespace SteamOpenIdConnectProvider.Profile.Models
         public string RealName { get; set; }
 
         [JsonPropertyName("primaryclanid")]
-        public ulong PrimaryClanId { get; set; }
+        public string PrimaryClanId { get; set; }
 
         [JsonPropertyName("timecreated")]
         public int TimeCreated { get; set; }

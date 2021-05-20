@@ -16,6 +16,9 @@ using SteamOpenIdConnectProvider.Models.IdentityServer;
 using SteamOpenIdConnectProvider.Domains.Common;
 using SteamOpenIdConnectProvider.Domains.IdentityServer;
 using SteamOpenIdConnectProvider.Domains.Steam;
+using System.IO;
+using System.Text;
+using Serilog;
 
 namespace SteamOpenIdConnectProvider
 {
@@ -86,6 +89,8 @@ namespace SteamOpenIdConnectProvider
             {
                 app.UsePathBase(hostingConfig.BasePath);
             }
+
+            app.UseSerilogRequestLogging();
 
             app.UseCookiePolicy();
             app.Use(async (ctx, next) =>
