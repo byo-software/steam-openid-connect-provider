@@ -11,7 +11,7 @@ namespace SteamOpenIdConnectProvider.Models.IdentityServer
     {
         public static IEnumerable<Client> GetClients(OpenIdConfig config)
         {
-            yield return new Client
+            var client = new Client
             {
                 ClientId = config.ClientID,
                 ClientName = config.ClientName,
@@ -23,10 +23,11 @@ namespace SteamOpenIdConnectProvider.Models.IdentityServer
                 },
 
                 // where to redirect to after login
-                RedirectUris = config.RedirectUri.Split(",").Select(x => x.Trim()).ToArray(),
+                RedirectUris = config.RedirectUris.ToArray(),
 
                 // where to redirect to after logout
-                PostLogoutRedirectUris = { config.PostLogoutRedirectUri },
+                PostLogoutRedirectUris = config.PostLogoutRedirectUris.ToArray(),
+
                 RequirePkce = false,
                 AllowedScopes = new List<string>
                 {
@@ -34,6 +35,7 @@ namespace SteamOpenIdConnectProvider.Models.IdentityServer
                     IdentityServerConstants.StandardScopes.Profile,
                 }
             };
+            yield return client;
         }
 
         public static IEnumerable<IdentityResource> GetIdentityResources()

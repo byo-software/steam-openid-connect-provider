@@ -14,5 +14,13 @@ namespace SteamOpenIdConnectProvider.Domains.IdentityServer
         public string RedirectUri { get; set; }
         public string PostLogoutRedirectUri { get; set; }
         public string ClientName { get; set; } = "Proxy Client";
+
+        public IEnumerable<string> RedirectUris => (RedirectUri ?? string.Empty).Split(
+            new[] { ',', ';' },
+            StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+        public IEnumerable<string> PostLogoutRedirectUris => (PostLogoutRedirectUri ?? string.Empty).Split(
+            new[] { ',', ';' },
+            StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
     }
 }

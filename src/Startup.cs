@@ -46,20 +46,23 @@ namespace SteamOpenIdConnectProvider
                 .AddEntityFrameworkStores<AppInMemoryDbContext>()
                 .AddDefaultTokenProviders();
 
-            var openIdConfig = Configuration.GetSection(OpenIdConfig.Key).Get<OpenIdConfig>();
-            services.AddIdentityServer(options =>
+            var openIdConfig = Configuration.GetSection(OpenIdConfig.Key);
+            services
+                .Configure<OpenIdConfig>(openIdConfig)
+                .AddIdentityServer(options =>
                 {
-                    options.UserInteraction.LoginUrl = "/ExternalLogin";
+                    options.UserInteraction.LoginUrl = "/external-login";
+                    options.UserInteraction.LogoutUrl = "/external-logout";
                 })
                 .AddAspNetIdentity<IdentityUser>()
-                .AddInMemoryClients(IdentityServerConfigFactory.GetClients(openIdConfig))
+                .AddInMemoryClients(IdentityServerConfigFactory.GetClients(openIdConfig.Get<OpenIdConfig>()))
                 .AddInMemoryPersistedGrants()
                 .AddDeveloperSigningCredential(true)
                 .AddInMemoryIdentityResources(IdentityServerConfigFactory.GetIdentityResources());
 
-            var steamConfig = Configuration.GetSection(SteamConfig.Key).Get<SteamConfig>();
+            var steamConfig = Configuration.GetSection(SteamConfig.Key);
             services
-                .Configure<SteamConfig>(Configuration.GetSection(SteamConfig.Key))
+                .Configure<SteamConfig>(steamConfig)
                 .AddHttpClient<IProfileService, SteamProfileService>();
 
             services.AddAuthentication()
@@ -70,7 +73,7 @@ namespace SteamOpenIdConnectProvider
                 })
                 .AddSteam(options =>
                 {
-                    options.ApplicationKey = steamConfig.ApplicationKey;
+                    options.ApplicationKey = steamConfig.Get<SteamConfig>().ApplicationKey;
                 });
 
             services.AddHealthChecks()

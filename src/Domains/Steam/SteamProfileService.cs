@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
@@ -9,6 +9,7 @@ using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using SteamOpenIdConnectProvider.Domains.IdentityServer;
 using SteamOpenIdConnectProvider.Domains.Steam;
 using SteamOpenIdConnectProvider.Models.Steam;
 
@@ -49,10 +50,11 @@ namespace SteamOpenIdConnectProvider.Services
 
             if (player != null)
             {
-                AddClaim(claims, "picture", player.AvatarFull);
-                AddClaim(claims, "nickname", player.PersonaName);
-                AddClaim(claims, "given_name", player.RealName);
-                AddClaim(claims, "website", player.ProfileUrl);
+                AddClaim(claims, OpenIdStandardClaims.Picture, player.AvatarFull);
+                AddClaim(claims, OpenIdStandardClaims.Nickname, player.PersonaName);
+                AddClaim(claims, OpenIdStandardClaims.PreferredUsername, player.PersonaName);
+                AddClaim(claims, OpenIdStandardClaims.GivenName, player.RealName);
+                AddClaim(claims, OpenIdStandardClaims.Website, player.ProfileUrl);
             }
 
             context.IssuedClaims = claims;
