@@ -14,6 +14,10 @@ FROM build AS publish
 RUN dotnet publish ./SteamOpenIdConnectProvider.csproj -c Release -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0
+
+RUN apt-get update && \
+    apt-get install -y curl
+
 WORKDIR /app
 COPY --from=publish /app .
 EXPOSE 80
