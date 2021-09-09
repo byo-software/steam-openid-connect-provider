@@ -20,6 +20,8 @@ namespace SteamOpenIdConnectProvider
                 {
                     new Secret(secret.Sha256())
                 },
+                AlwaysSendClientClaims = true,
+                AlwaysIncludeUserClaimsInIdToken = true,
 
                 // where to redirect to after login
                 RedirectUris = redirectUri.Split(",").Select(x => x.Trim()).ToArray(),
