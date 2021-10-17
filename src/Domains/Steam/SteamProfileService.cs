@@ -8,6 +8,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SteamOpenIdConnectProvider.Domains.IdentityServer;
 using SteamOpenIdConnectProvider.Domains.Steam;
@@ -20,16 +21,19 @@ namespace SteamOpenIdConnectProvider.Services
         private readonly HttpClient _httpClient;
         private readonly SteamConfig _config;
         private readonly IUserClaimsPrincipalFactory<IdentityUser> _claimsFactory;
+        private readonly ILogger<SteamProfileService> _logger;
         private readonly UserManager<IdentityUser> _userManager;
 
         public SteamProfileService(
             UserManager<IdentityUser> userManager,
             IUserClaimsPrincipalFactory<IdentityUser> claimsFactory,
             IOptions<SteamConfig> config,
+            ILogger<SteamProfileService> logger,
             HttpClient httpClient)
         {
             _userManager = userManager;
             _claimsFactory = claimsFactory;
+            _logger = logger;
             _config = config.Value;
             _httpClient = httpClient;
         }
@@ -44,6 +48,7 @@ namespace SteamOpenIdConnectProvider.Services
             claims = claims.Where(claim => context.RequestedClaimTypes.Contains(claim.Type)).ToList();
 
             var steamId = sub.Substring(Constants.OpenIdUrl.Length);
+            AddClaim(claims, SteamClaims.SteamId, steamId);
 
             var userSummary = await GetPlayerSummariesAsync(new[] { steamId });
             var player = userSummary.Players.FirstOrDefault();
@@ -55,6 +60,17 @@ namespace SteamOpenIdConnectProvider.Services
                 AddClaim(claims, OpenIdStandardClaims.PreferredUsername, player.PersonaName);
                 AddClaim(claims, OpenIdStandardClaims.GivenName, player.RealName);
                 AddClaim(claims, OpenIdStandardClaims.Website, player.ProfileUrl);
+            }
+
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                foreach (var claim in claims)
+                {
+                    _logger.LogDebug("Issued claim {claim}:{value} for {principle}",
+                        claim.Type,
+                        claim.Value,
+                        principal.Identity.Name);
+                }
             }
 
             context.IssuedClaims = claims;

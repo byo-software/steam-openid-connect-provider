@@ -19,6 +19,7 @@ using SteamOpenIdConnectProvider.Domains.Steam;
 using System.IO;
 using System.Text;
 using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace SteamOpenIdConnectProvider
 {
@@ -82,8 +83,11 @@ namespace SteamOpenIdConnectProvider
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var logger = app.ApplicationServices.GetRequiredService<ILogger<Startup>>();
+
             if (env.IsDevelopment())
             {
+                logger.LogWarning("Starting up in development mode");
                 app.UseDeveloperExceptionPage();
             }
 
