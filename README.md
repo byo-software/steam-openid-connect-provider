@@ -49,19 +49,20 @@ This service contains a health check endpoint at `/health`. It checks if the Ste
 
 ## Docker
 
-[A docker image](https://hub.docker.com/r/imperialplugins/steam-openid-connect-provider) is also available.
+A docker image is also available.
 
 ```
 docker run -it \
     -e OpenID__RedirectUri=http://localhost:8080/auth/realms/master/broker/steam/endpoint \
     -e OpenID__ClientID=steamidp \
     -e OpenID__ClientSecret=mysecret \
-    -e Authentication__Steam__ApplicationKey=MySteamApiKey \
+    -e OpenID__ClientName=myclientname \
+    -e Steam__ApplicationKey=MySteamApiKey \
     --restart unless-stopped \
     --name steamidp \
-    imperialplugins/steam-openid-connect-provider
+    ghcr.io/byo-software/steam-openid-connect-provider
 ```
 
 ## License
 
-[MIT](https://github.com/ImperialPlugins/steam-openid-connect-provider/blob/master/LICENSE)
+[MIT](https://github.com/byo-software/steam-openid-connect-provider/blob/master/LICENSE)
