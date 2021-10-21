@@ -9,10 +9,10 @@ This server allows you to use Steam as an OpenID Connect Identity provider (OIDC
 ## Setup
 
 Add your Steam API Key as user-secrets like this:
-`dotnet user-secrets set "Authentication:Steam:ApplicationKey" "MySteamApiKey"`
+`dotnet user-secrets set "Steam:ApplicationKey" "MySteamApiKey"`
 
 Alternatively you can set it up via environment variables:
-`Authentication__Steam__ApplicationKey=MySteamApiKey`
+`Steam__ApplicationKey=MySteamApiKey`
 (Keep in mind that this is easier but more insecure)
 
 After that set up your redirect URI, ClientID and ClientSecret in the appsettings.json.
