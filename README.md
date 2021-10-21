@@ -33,7 +33,7 @@ If you use the `profile` scope, you get access to the `picture`, `given_name`, `
 
 ## HTTPS Support
 
-This server does not support https connections. If you want to use https connections please use a reverse proxy like nginx.
+The server itself does not support https connections. If you want to use https connections please use a reverse proxy like nginx. The [example docker-compose.yml](https://github.com/byo-software/steam-openid-connect-provider/blob/master/docker-compose.yml) contains an example setup.
 
 ## Running behind reverse proxies
 
