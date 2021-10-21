@@ -33,7 +33,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            ghcr.io/neothor/steam-openid-connect-provider
+            ghcr.io/byo-software/steam-openid-connect-provider
           tags: |
             type=schedule
             type=ref,event=branch
