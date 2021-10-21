@@ -1,0 +1,7 @@
+version: '2'
+services: 
+    proxy:
+        environment: 
+            STEAMIDP_URI: https://steamidp-debugger:5001
+        extra_hosts:
+            - "steamidp-debugger:host-gateway"

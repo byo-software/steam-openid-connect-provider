@@ -1,0 +1,29 @@
+@startuml
+
+node Host {
+    component Browser
+
+    node Docker {
+        component Proxy
+        component Keycloak
+        component SteamIdp
+        component Postgresql
+
+        Proxy --> Keycloak: keycloak (http)
+        Proxy --> SteamIdp: steamidp (http)
+        Keycloak --> Postgresql: postgres
+
+        Proxy <-- Keycloak: dev.local (https)
+    }
+
+    component SteamIdpDev as "SteamIdp"
+}
+
+cloud Internet {
+    component Steam
+}
+
+Browser --> Proxy: dev.local (https)
+Proxy ..> SteamIdpDev: host.docker.internal (http)
+
+@enduml

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Http;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,8 +11,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.HttpOverrides;
-using SteamOpenIdConnectProvider.Database;
-using SteamOpenIdConnectProvider.Profile;
+using SteamOpenIdConnectProvider.Services;
+using SteamOpenIdConnectProvider.Models.IdentityServer;
+using SteamOpenIdConnectProvider.Domains.Common;
+using SteamOpenIdConnectProvider.Domains.IdentityServer;
+using SteamOpenIdConnectProvider.Domains.Steam;
+using System.IO;
+using System.Text;
+using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace SteamOpenIdConnectProvider
 {
@@ -29,10 +35,8 @@ namespace SteamOpenIdConnectProvider
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers()
-                .AddNewtonsoftJson()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
-            services.AddSingleton(Configuration);
             services.AddDbContext<AppInMemoryDbContext>(options =>
                 options.UseInMemoryDatabase("default"));
 
@@ -43,21 +47,24 @@ namespace SteamOpenIdConnectProvider
                 .AddEntityFrameworkStores<AppInMemoryDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddIdentityServer(options =>
+            var openIdConfig = Configuration.GetSection(OpenIdConfig.Key);
+            services
+                .Configure<OpenIdConfig>(openIdConfig)
+                .AddIdentityServer(options =>
                 {
-                    options.UserInteraction.LoginUrl = "/ExternalLogin";
+                    options.UserInteraction.LoginUrl = "/external-login";
+                    options.UserInteraction.LogoutUrl = "/external-logout";
                 })
                 .AddAspNetIdentity<IdentityUser>()
-                .AddInMemoryClients(IdentityServerConfig.GetClients(
-                    Configuration["OpenID:ClientID"],
-                    Configuration["OpenID:ClientSecret"],
-                    Configuration["OpenID:RedirectUri"],
-                    Configuration["OpenID:PostLogoutRedirectUri"]))
+                .AddInMemoryClients(IdentityServerConfigFactory.GetClients(openIdConfig.Get<OpenIdConfig>()))
                 .AddInMemoryPersistedGrants()
                 .AddDeveloperSigningCredential(true)
-                .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResources());
+                .AddInMemoryIdentityResources(IdentityServerConfigFactory.GetIdentityResources());
 
-            services.AddHttpClient<IProfileService, SteamProfileService>();
+            var steamConfig = Configuration.GetSection(SteamConfig.Key);
+            services
+                .Configure<SteamConfig>(steamConfig)
+                .AddHttpClient<IProfileService, SteamProfileService>();
 
             services.AddAuthentication()
                 .AddCookie(options =>
@@ -67,32 +74,37 @@ namespace SteamOpenIdConnectProvider
                 })
                 .AddSteam(options =>
                 {
-                    options.ApplicationKey = Configuration["Authentication:Steam:ApplicationKey"];
+                    options.ApplicationKey = steamConfig.Get<SteamConfig>().ApplicationKey;
                 });
 
             services.AddHealthChecks()
-                .AddUrlGroup(new Uri("https://steamcommunity.com/openid"), "Steam");
+                .AddUrlGroup(new Uri(Constants.OpenIdUrl), "Steam");
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var logger = app.ApplicationServices.GetRequiredService<ILogger<Startup>>();
+
             if (env.IsDevelopment())
             {
+                logger.LogWarning("Starting up in development mode");
                 app.UseDeveloperExceptionPage();
             }
 
-            if (!string.IsNullOrEmpty(Configuration["Hosting:PathBase"]))
+            var hostingConfig = Configuration.GetSection(HostingConfig.Key).Get<HostingConfig>();
+            if (!string.IsNullOrEmpty(hostingConfig.BasePath))
             {
-                app.UsePathBase(Configuration["Hosting:PathBase"]);
+                app.UsePathBase(hostingConfig.BasePath);
             }
+
+            app.UseSerilogRequestLogging();
 
             app.UseCookiePolicy();
             app.Use(async (ctx, next) =>
             {
-                var origin = Configuration["Hosting:PublicOrigin"];
-                if (!string.IsNullOrEmpty(origin))
+                if (!string.IsNullOrEmpty(hostingConfig.PublicOrigin))
                 {
-                    ctx.SetIdentityServerOrigin(origin);
+                    ctx.SetIdentityServerOrigin(hostingConfig.PublicOrigin);
                 }
 
                 await next();

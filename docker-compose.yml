@@ -1,0 +1,57 @@
+version: '2'
+volumes:
+    postgres_data:
+        driver: local
+
+services: 
+    proxy:
+        image: neothor/proxy:develop
+        build: ./develop/proxy
+        container_name: proxy
+        ports:
+            - 443:443
+        links:
+            - keycloak
+            - steamidp
+
+    postgres:
+        image: postgres
+        container_name: postgres
+        volumes:
+          - postgres_data:/var/lib/postgresql/data
+        environment:
+          POSTGRES_DB: keycloak
+          POSTGRES_USER: keycloak
+          POSTGRES_PASSWORD: password
+
+    keycloak:
+        image: neothor/keycloak:develop
+        build: ./develop/keycloak
+        container_name: keycloak
+        environment: 
+            DB_VENDOR: POSTGRES
+            DB_ADDR: postgres
+            DB_DATABASE: keycloak
+            DB_USER: keycloak
+            DB_SCHEMA: public
+            DB_PASSWORD: password
+            KEYCLOAK_USER: admin 
+            KEYCLOAK_PASSWORD: changeit
+            PROXY_ADDRESS_FORWARDING: "true"
+        links:
+            - postgres    
+        extra_hosts:
+            - "dev.local:host-gateway"
+    
+    steamidp:
+        image: neothor/steam-openid-connect-provider:develop
+        build: ./src
+        container_name: steamidp 
+        links:
+            - keycloak
+        environment: 
+            OpenID__ClientID: keycloak
+            OpenID__ClientName: keycloak
+            OpenId__ClientSecret: keycloak
+            OpenID__RedirectUri: https://dev.local/auth/realms/dev/broker/steam/endpoint
+            Hosting__BasePath: /steam

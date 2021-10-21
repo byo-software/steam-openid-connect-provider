@@ -1,33 +1,35 @@
-﻿using System;  
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;  
+using System.Linq;
 using IdentityServer4;
 using IdentityServer4.Models;
+using SteamOpenIdConnectProvider.Domains.IdentityServer;
 
-namespace SteamOpenIdConnectProvider
+namespace SteamOpenIdConnectProvider.Models.IdentityServer
 {
-    public class IdentityServerConfig
+    public static class IdentityServerConfigFactory
     {
-        public static IEnumerable<Client> GetClients(string clientId, string secret, string redirectUri, string logoutRedirectUri)
+        public static IEnumerable<Client> GetClients(OpenIdConfig config)
         {
-            yield return new Client
+            var client = new Client
             {
-                ClientId = clientId,
-                ClientName = "Proxy Client",
+                ClientId = config.ClientID,
+                ClientName = config.ClientName,
                 AllowedGrantTypes = GrantTypes.Code,
                 RequireConsent = false,
                 ClientSecrets =
                 {
-                    new Secret(secret.Sha256())
+                    new Secret(config.ClientSecret.Sha256())
                 },
                 AlwaysSendClientClaims = true,
                 AlwaysIncludeUserClaimsInIdToken = true,
 
                 // where to redirect to after login
-                RedirectUris = redirectUri.Split(",").Select(x => x.Trim()).ToArray(),
+                RedirectUris = config.RedirectUris.ToArray(),
 
                 // where to redirect to after logout
-                PostLogoutRedirectUris = { logoutRedirectUri },
+                PostLogoutRedirectUris = config.PostLogoutRedirectUris.ToArray(),
+
                 RequirePkce = false,
                 AllowedScopes = new List<string>
                 {
@@ -35,6 +37,7 @@ namespace SteamOpenIdConnectProvider
                     IdentityServerConstants.StandardScopes.Profile,
                 }
             };
+            yield return client;
         }
 
         public static IEnumerable<IdentityResource> GetIdentityResources()
