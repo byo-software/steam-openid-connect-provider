@@ -49,7 +49,7 @@ This service contains a health check endpoint at `/health`. It checks if the Ste
 
 ## Docker
 
-A docker image is also available.
+[A docker image](https://github.com/byo-software/steam-openid-connect-provider/pkgs/container/steam-openid-connect-provider) is also available.
 
 ```
 docker run -it \
