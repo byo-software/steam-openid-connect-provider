@@ -1,25 +1,22 @@
 ﻿using System;
 using IdentityServer4.Extensions;
+using IdentityServer4.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using IdentityServer4.Services;
-using Microsoft.AspNetCore.HttpOverrides;
-using SteamOpenIdConnectProvider.Services;
-using SteamOpenIdConnectProvider.Models.IdentityServer;
+using Microsoft.Extensions.Logging;
+using Serilog;
 using SteamOpenIdConnectProvider.Domains.Common;
 using SteamOpenIdConnectProvider.Domains.IdentityServer;
 using SteamOpenIdConnectProvider.Domains.Steam;
-using System.IO;
-using System.Text;
-using Serilog;
-using Microsoft.Extensions.Logging;
+using SteamOpenIdConnectProvider.Models.IdentityServer;
+using SteamOpenIdConnectProvider.Services;
 
 namespace SteamOpenIdConnectProvider
 {
@@ -34,8 +31,7 @@ namespace SteamOpenIdConnectProvider
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddControllers();
 
             services.AddDbContext<AppInMemoryDbContext>(options =>
                 options.UseInMemoryDatabase("default"));
