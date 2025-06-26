@@ -50,8 +50,8 @@ services:
         links:
             - keycloak
         environment: 
-            OpenID__ClientID: keycloak
-            OpenID__ClientName: keycloak
+            OpenId__ClientId: keycloak
+            OpenId__ClientName: keycloak
             OpenId__ClientSecret: keycloak
-            OpenID__RedirectUri: https://dev.local/auth/realms/dev/broker/steam/endpoint
+            OpenId__RedirectUri: https://dev.local/auth/realms/dev/broker/steam/endpoint
             Hosting__BasePath: /steam

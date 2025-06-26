@@ -5,7 +5,7 @@ namespace SteamOpenIdConnectProvider.Domains.IdentityServer;
 
 public sealed class OpenIdConfig
 {
-    public const string ConfigKey = "OpenID";
+    public const string ConfigKey = "OpenId";
 
     public required string ClientId { get; set; }
     

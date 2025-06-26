@@ -18,7 +18,7 @@ Alternatively you can set it up via environment variables:
 After that set up your redirect URI, ClientID and ClientSecret in the appsettings.json.
 
 If you need to set up multiple redirect URIs, you can set them separated by a comma.
-`OpenID__RedirectUri="http://localhost:8080/auth/realms/master/broker/steam/endpoint, http://localhost:8080/auth/realms/dev/broker/steam/endpoint"`
+`OpenId__RedirectUri="http://localhost:8080/auth/realms/master/broker/steam/endpoint, http://localhost:8080/auth/realms/dev/broker/steam/endpoint"`
 
 ## OpenID Configuration
 
@@ -53,10 +53,10 @@ This service contains a health check endpoint at `/health`. It checks if the Ste
 
 ```
 docker run -it \
-    -e OpenID__RedirectUri=http://localhost:8080/auth/realms/master/broker/steam/endpoint \
-    -e OpenID__ClientID=steamidp \
-    -e OpenID__ClientSecret=mysecret \
-    -e OpenID__ClientName=myclientname \
+    -e OpenId__RedirectUri=http://localhost:8080/auth/realms/master/broker/steam/endpoint \
+    -e OpenId__ClientId=steamidp \
+    -e OpenId__ClientSecret=mysecret \
+    -e OpenId__ClientName=myclientname \
     -e Steam__ApplicationKey=MySteamApiKey \
     --restart unless-stopped \
     --name steamidp \
