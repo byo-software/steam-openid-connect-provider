@@ -20,7 +20,10 @@ RUN apt-get update && \
 
 WORKDIR /app
 COPY --from=publish /app .
-EXPOSE 80
+
+
+ENV ASPNETCORE_URLS "http://*:8080"
+EXPOSE 8080
 
 HEALTHCHECK CMD curl --fail http://localhost/health || exit 1
 ENTRYPOINT ["dotnet", "SteamOpenIdConnectProvider.dll"]
