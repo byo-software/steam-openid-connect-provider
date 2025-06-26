@@ -88,7 +88,7 @@ public sealed class Startup(IConfiguration configuration)
                         = client.DefaultRequestHeaders.UserAgent;
 
                     userAgentHeaders.Clear();
-                    userAgentHeaders.Add(new ProductInfoHeaderValue("SteamOpenIdConnectProvider/1.1"));
+                    userAgentHeaders.Add(new ProductInfoHeaderValue("SteamOpenIdConnectProvider", "1.1.0"));
                 });
     }
 
