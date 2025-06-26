@@ -1,10 +1,9 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace SteamOpenIdConnectProvider.Models.Steam
+namespace SteamOpenIdConnectProvider.Domains.Steam;
+
+public sealed class SteamResponse<T>
 {
-    public sealed class SteamResponse<T>
-    {
-        [JsonPropertyName("response")]
-        public T Response { get; set; }
-    }
+    [JsonPropertyName("response")]
+    public required T Response { get; set; }
 }

@@ -4,6 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <UserSecretsId>9f8cb9ce-f696-422f-901a-563af9413684</UserSecretsId>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>Nullable</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

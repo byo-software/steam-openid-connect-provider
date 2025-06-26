@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿namespace SteamOpenIdConnectProvider.Domains.Common;
 
-namespace SteamOpenIdConnectProvider.Domains.Common
+public sealed class HostingConfig
 {
-    public class HostingConfig
-    {
-        public static readonly string Key = "Hosting";
+    public const string Config = "Hosting";
 
-        public string BasePath { get; set; }
+    public string? BasePath { get; set; }
 
-        public string PublicOrigin { get; set; }
-    }
+    public string? PublicOrigin { get; set; }
 }

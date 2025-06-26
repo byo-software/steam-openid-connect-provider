@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿namespace SteamOpenIdConnectProvider.Domains.Steam;
 
-namespace SteamOpenIdConnectProvider.Domains.Steam
+public sealed class SteamConfig
 {
-    public class SteamConfig
-    {
-        public static readonly string Key = "Steam";
+    public const string ConfigKey = "Steam";
 
-        public string ApplicationKey { get; set; }
-    }
+    public required string ApplicationKey { get; set; }
 }

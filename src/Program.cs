@@ -1,51 +1,48 @@
 ﻿using System;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
+using SteamOpenIdConnectProvider;
 
-namespace SteamOpenIdConnectProvider
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+
+try
 {
-    public class Program
-    {
-        public static int Main(string[] args)
-        {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .CreateBootstrapLogger();
+    Log.Information("Starting web host");
 
-            try
-            {
-                Log.Information("Starting web host");
-                CreateHostBuilder(args).Build().Run();
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "Host terminated unexpectedly");
-                return 1;
-            }
-            finally
-            {
-                Log.CloseAndFlush();
-            }
-        }
+    await CreateHostBuilder(args)
+        .Build()
+        .RunAsync();
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseSerilog((context, services, configuration) => configuration
-                    .ReadFrom.Configuration(context.Configuration)
-                    .ReadFrom.Services(services)
-                    .MinimumLevel.Is(context.HostingEnvironment.IsDevelopment() ? LogEventLevel.Debug : LogEventLevel.Information)
-                    .Enrich.FromLogContext()
-                    .WriteTo.Console(theme: AnsiConsoleTheme.Code))
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-    }
+    return 0;
 }
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly");
+    return 1;
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
+}
+
+IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .UseSerilog((context, services, configuration) => configuration
+                .ReadFrom.Configuration(context.Configuration)
+                .ReadFrom.Services(services)
+                .MinimumLevel.Is(context.HostingEnvironment.IsDevelopment()
+                    ? LogEventLevel.Debug
+                    : LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Console(theme: AnsiConsoleTheme.Code))
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+            });

@@ -1,26 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace SteamOpenIdConnectProvider.Domains.IdentityServer
+namespace SteamOpenIdConnectProvider.Domains.IdentityServer;
+
+public sealed class OpenIdConfig
 {
-    public class OpenIdConfig
-    {
-        public static readonly string Key = "OpenID";
+    public const string ConfigKey = "OpenID";
 
-        public string ClientID { get; set; }
-        public string ClientSecret { get; set; }
-        public string RedirectUri { get; set; }
-        public string PostLogoutRedirectUri { get; set; }
-        public string ClientName { get; set; } = "Proxy Client";
+    public required string ClientId { get; set; }
+    
+    public required string ClientSecret { get; set; }
+    
+    public string? RedirectUri { get; set; }
+    
+    public string? PostLogoutRedirectUri { get; set; }
+    
+    public string ClientName { get; set; } = "Proxy Client";
 
-        public IEnumerable<string> RedirectUris => (RedirectUri ?? string.Empty).Split(
-            new[] { ',', ';' },
-            StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+    public IEnumerable<string> RedirectUris => (RedirectUri ?? string.Empty).Split(
+        [',', ';'],
+        StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
-        public IEnumerable<string> PostLogoutRedirectUris => (PostLogoutRedirectUri ?? string.Empty).Split(
-            new[] { ',', ';' },
-            StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-    }
+    public IEnumerable<string> PostLogoutRedirectUris => (PostLogoutRedirectUri ?? string.Empty).Split(
+        [',', ';'],
+        StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 }

@@ -12,120 +12,111 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SteamOpenIdConnectProvider.Domains.IdentityServer;
 
-namespace SteamOpenIdConnectProvider.Controllers
+namespace SteamOpenIdConnectProvider.Controllers;
+
+[AllowAnonymous]
+public sealed class ExternalLoginController(
+    SignInManager<IdentityUser> signInManager,
+    UserManager<IdentityUser> userManager,
+    IIdentityServerInteractionService interaction,
+    IEventService events,
+    IOptions<OpenIdConfig> config,
+    ILogger<ExternalLoginController> logger)
+    : Controller
 {
-    [AllowAnonymous]
-    public class ExternalLoginController : Controller
+    private readonly OpenIdConfig _config = config.Value;
+
+
+    [HttpGet("external-login")]
+    public Task<IActionResult> ExternalLogin(string? returnUrl = null)
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly IIdentityServerInteractionService _interaction;
-        private readonly IEventService _events;
+        const string Provider = "Steam";
 
-        private readonly OpenIdConfig _config;
-        private readonly ILogger<ExternalLoginController> _logger;
+        var redirectUrl = Url.Action("ExternalLoginCallback", new { returnUrl });
+        var properties = signInManager.ConfigureExternalAuthenticationProperties(Provider, redirectUrl);
+        return Task.FromResult<IActionResult>(new ChallengeResult(Provider, properties));
+    }
 
-        public ExternalLoginController(
-            SignInManager<IdentityUser> signInManager,
-            UserManager<IdentityUser> userManager,
-            IIdentityServerInteractionService interaction,
-            IEventService events,
-            IOptions<OpenIdConfig> config,
-            ILogger<ExternalLoginController> logger)
+    [HttpGet("external-login-callback")]
+    public async Task<IActionResult> ExternalLoginCallback(
+        string? returnUrl = null, 
+        string? remoteError = null)
+    {
+        returnUrl ??= Url.Content("~/");
+
+        if (remoteError != null)
         {
-            _signInManager = signInManager;
-            _userManager = userManager;
-            _config = config.Value;
-            _logger = logger;
-            _interaction = interaction;
-            _events = events;
+            throw new Exception($"Error from external provider: {remoteError}");
         }
 
-
-        [HttpGet("external-login")]
-        public Task<IActionResult> ExternalLogin(string returnUrl = null)
+        var info = await signInManager.GetExternalLoginInfoAsync();
+        if (info == null)
         {
-            const string provider = "Steam";
-
-            var redirectUrl = Url.Action("ExternalLoginCallback", new { returnUrl });
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return Task.FromResult<IActionResult>(new ChallengeResult(provider, properties));
+            throw new Exception("Error loading external login information.");
         }
 
-        [HttpGet("external-login-callback")]
-        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        var externalLoginResult = await signInManager.ExternalLoginSignInAsync(
+            info.LoginProvider, 
+            info.ProviderKey, 
+            isPersistent: false, 
+            bypassTwoFactor: true);
+            
+        if (externalLoginResult.Succeeded)
         {
-            returnUrl ??= Url.Content("~/");
+            logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity?.Name ?? "<null>", info.LoginProvider);
+            return LocalRedirect(returnUrl);
+        }
 
-            if (remoteError != null)
-            {
-                throw new Exception($"Error from external provider: {remoteError}");
-            }
+        var userName = info.Principal.FindFirstValue(ClaimTypes.Name);
+        var userId = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
-            {
-                throw new Exception($"Error loading external login information.");
-            }
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            throw new ArgumentNullException(nameof(userId), $"No claim found for {ClaimTypes.NameIdentifier}");
+        }
 
-            var externalLoginResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
-            if (externalLoginResult.Succeeded)
-            {
-                _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
-                return LocalRedirect(returnUrl);
-            }
+        if (string.IsNullOrWhiteSpace(userName))
+        {
+            userName = userId.Split('/').Last();
+        }
 
-            var userName = info.Principal.FindFirstValue(ClaimTypes.Name);
-            var userId = info.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        var user = new IdentityUser { UserName = userName, Id = userId };
 
-            if (string.IsNullOrEmpty(userId))
-            {
-                throw new ArgumentNullException(nameof(userId), $"No claim found for {ClaimTypes.NameIdentifier}");
-            }
+        userManager.UserValidators.Clear();
 
-            if (string.IsNullOrEmpty(userName))
-            {
-                userName = userId.Split('/').Last();
-            }
-
-            var user = new IdentityUser { UserName = userName, Id = userId };
-
-            _userManager.UserValidators.Clear();
-
-            var result = await _userManager.CreateAsync(user);
+        var result = await userManager.CreateAsync(user);
+        if (result.Succeeded)
+        {
+            result = await userManager.AddLoginAsync(user, info);
             if (result.Succeeded)
             {
-                result = await _userManager.AddLoginAsync(user, info);
-                if (result.Succeeded)
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
-                    return LocalRedirect(returnUrl);
-                }
+                await signInManager.SignInAsync(user, isPersistent: false);
+                logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+                return LocalRedirect(returnUrl);
             }
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
-            return BadRequest();
         }
 
-        [HttpGet("external-logout")]
-        public async Task<ActionResult> ExternalLogout(string logoutId)
+        foreach (var error in result.Errors)
         {
-            var logout = await _interaction.GetLogoutContextAsync(logoutId);
-
-            if (User?.Identity.IsAuthenticated == true)
-            {
-                await _signInManager.SignOutAsync();
-                await _events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));
-            }
-
-            return Redirect(logout?.PostLogoutRedirectUri ??
-                _config.PostLogoutRedirectUris.FirstOrDefault() ??
-                Url.Content("~/"));
+            ModelState.AddModelError(string.Empty, error.Description);
         }
+
+        return BadRequest();
+    }
+
+    [HttpGet("external-logout")]
+    public async Task<ActionResult> ExternalLogout(string logoutId)
+    {
+        var logout = await interaction.GetLogoutContextAsync(logoutId);
+
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            await signInManager.SignOutAsync();
+            await events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));
+        }
+
+        return Redirect(logout?.PostLogoutRedirectUri ??
+                        _config.PostLogoutRedirectUris.FirstOrDefault() ??
+                        Url.Content("~/"));
     }
 }
