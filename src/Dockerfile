@@ -25,5 +25,5 @@ COPY --from=publish /app .
 ENV ASPNETCORE_URLS "http://*:8080"
 EXPOSE 8080
 
-HEALTHCHECK CMD curl --fail http://localhost/health || exit 1
+HEALTHCHECK CMD curl --fail http://localhost:8080/health || exit 1
 ENTRYPOINT ["dotnet", "SteamOpenIdConnectProvider.dll"]
