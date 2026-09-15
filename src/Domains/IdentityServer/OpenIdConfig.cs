@@ -17,6 +17,8 @@ public sealed class OpenIdConfig
     
     public string ClientName { get; set; } = "Proxy Client";
 
+    public bool ReturnErrorsToClient { get; set; }
+
     public IEnumerable<string> RedirectUris => (RedirectUri ?? string.Empty).Split(
         [',', ';'],
         StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);

@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using IdentityServer4.Extensions;
 using IdentityServer4.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +41,7 @@ public sealed class Startup(IConfiguration configuration)
             .AddDefaultTokenProviders();
 
         var openIdConfig = configuration.GetSection(OpenIdConfig.ConfigKey);
+        var openIdSettings = openIdConfig.Get<OpenIdConfig>()!;
         services
             .Configure<OpenIdConfig>(openIdConfig)
             .AddIdentityServer(options =>
@@ -46,7 +51,7 @@ public sealed class Startup(IConfiguration configuration)
             })
             .AddAspNetIdentity<IdentityUser>()
             .AddProfileService<SteamProfileService>()
-            .AddInMemoryClients(IdentityServerConfigFactory.GetClients(openIdConfig.Get<OpenIdConfig>()!))
+            .AddInMemoryClients(IdentityServerConfigFactory.GetClients(openIdSettings))
             .AddInMemoryPersistedGrants()
             .AddDeveloperSigningCredential()
             .AddInMemoryIdentityResources(IdentityServerConfigFactory.GetIdentityResources());
@@ -77,6 +82,12 @@ public sealed class Startup(IConfiguration configuration)
                 var timeout = TimeSpan.FromMinutes(steamSettings.LoginTimeoutMinutes);
                 options.RemoteAuthenticationTimeout = timeout;   // overall flow deadline (framework default 15m)
                 options.CorrelationCookie.Expiration = timeout;  // keep the correlation cookie alive for the whole window
+
+                if (openIdSettings.ReturnErrorsToClient)
+                {
+                    options.Events.OnRemoteFailure = context =>
+                        HandleSteamRemoteFailure(context, options.StateDataFormat);
+                }
             });
             
         services.Configure<CookiePolicyOptions>(options =>
@@ -177,5 +188,68 @@ public sealed class Startup(IConfiguration configuration)
         {
             options.SameSite = SameSiteMode.Unspecified;
         }
+    }
+
+    // When OpenId:ReturnErrorsToClient is enabled, turn a failed Steam login into a standard
+    // OAuth2 error response back to the originating client instead of surfacing an HTTP 500.
+    private static async Task HandleSteamRemoteFailure(
+        RemoteFailureContext context,
+        ISecureDataFormat<AuthenticationProperties>? stateFormat)
+    {
+        // On a correlation/timeout failure the framework leaves context.Properties null, so recover
+        // the authentication properties by unprotecting the state carried on the callback request.
+        // Properties.RedirectUri is the external login callback, whose returnUrl query parameter
+        // carries the original OIDC authorize request.
+        var properties = context.Properties;
+        if (properties is null && stateFormat is not null)
+        {
+            var state = context.Request.Query["state"].ToString();
+            properties = string.IsNullOrEmpty(state) ? null : stateFormat.Unprotect(state);
+        }
+
+        var returnUrl = GetReturnUrl(properties?.RedirectUri);
+        if (returnUrl == null)
+        {
+            // Cannot recover the original request; let the failure propagate (unchanged behaviour).
+            return;
+        }
+
+        var interaction = context.HttpContext.RequestServices
+            .GetRequiredService<IIdentityServerInteractionService>();
+        var request = await interaction.GetAuthorizationContextAsync(returnUrl);
+        if (request is null || request.RedirectUri is null)
+        {
+            // Not a valid authorization request; let the failure propagate (unchanged behaviour).
+            return;
+        }
+
+        Log.Warning(context.Failure, "Steam login failed; returning an error response to the client.");
+
+        var errorUrl = QueryHelpers.AddQueryString(request.RedirectUri, new Dictionary<string, string?>
+        {
+            ["error"] = "temporarily_unavailable",
+            ["error_description"] = "The Steam login could not be completed. Please try again.",
+            ["state"] = request.Parameters["state"],
+        });
+
+        context.HandleResponse();
+        context.Response.Redirect(errorUrl);
+    }
+
+    private static string? GetReturnUrl(string? callbackUri)
+    {
+        if (string.IsNullOrEmpty(callbackUri))
+        {
+            return null;
+        }
+
+        var queryIndex = callbackUri.IndexOf('?');
+        if (queryIndex < 0)
+        {
+            return null;
+        }
+
+        var query = QueryHelpers.ParseQuery(callbackUri[(queryIndex + 1)..]);
+        return query.TryGetValue("returnUrl", out var returnUrl) ? returnUrl.ToString() : null;
     }
 }
