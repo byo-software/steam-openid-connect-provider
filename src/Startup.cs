@@ -52,6 +52,13 @@ public sealed class Startup(IConfiguration configuration)
             .AddInMemoryIdentityResources(IdentityServerConfigFactory.GetIdentityResources());
 
         var steamConfig = configuration.GetSection(SteamConfig.ConfigKey);
+        var steamSettings = steamConfig.Get<SteamConfig>()!;
+        if (steamSettings.LoginTimeoutMinutes <= 0)
+        {
+            throw new InvalidOperationException(
+                $"{SteamConfig.ConfigKey}:{nameof(SteamConfig.LoginTimeoutMinutes)} must be greater than 0.");
+        }
+
         services
             .Configure<SteamConfig>(steamConfig)
             .AddHttpClient<IProfileService, SteamProfileService>();
@@ -65,7 +72,11 @@ public sealed class Startup(IConfiguration configuration)
             })
             .AddSteam(options =>
             {
-                options.ApplicationKey = steamConfig.Get<SteamConfig>()!.ApplicationKey;
+                options.ApplicationKey = steamSettings.ApplicationKey;
+
+                var timeout = TimeSpan.FromMinutes(steamSettings.LoginTimeoutMinutes);
+                options.RemoteAuthenticationTimeout = timeout;   // overall flow deadline (framework default 15m)
+                options.CorrelationCookie.Expiration = timeout;  // keep the correlation cookie alive for the whole window
             });
             
         services.Configure<CookiePolicyOptions>(options =>
