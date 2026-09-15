@@ -43,6 +43,12 @@ To set the origin, set `Hosting:PublicOrigin` in the appsettings.json or the `Ho
 
 Similary, you can use the `Hosting:PathBase` in the appsettings.json or the `Hosting__PathBase` environment variable to set the path base. If not set, it will default to "/".
 
+## Login timeout
+
+Users have a limited amount of time to complete the Steam login flow before it times out and has to be restarted. To change this, set `Steam:LoginTimeoutMinutes` in the appsettings.json or the `Steam__LoginTimeoutMinutes` environment variable to the desired number of minutes. If not set, it defaults to 15 minutes.
+
+Keep in mind that this timeout also controls how long the login's anti-forgery (correlation) cookie stays valid. A longer value widens the window for login CSRF and replay of an in-flight login, so it is best to keep it as short as your users can tolerate and to avoid values of hours or days.
+
 ## Health checks
 
 This service contains a health check endpoint at `/health`. It checks if the Steam login servers are working.
