@@ -48,6 +48,11 @@ Similary, you can use the `Hosting:PathBase` in the appsettings.json or the `Hos
 Users have a limited amount of time to complete the Steam login flow before it times out and has to be restarted. To change this, set `Steam:LoginTimeoutMinutes` in the appsettings.json or the `Steam__LoginTimeoutMinutes` environment variable to the desired number of minutes. If not set, it defaults to 15 minutes.
 
 Keep in mind that this timeout also controls how long the login's anti-forgery (correlation) cookie stays valid. A longer value widens the window for login CSRF and replay of an in-flight login, so it is best to keep it as short as your users can tolerate and to avoid values of hours or days.
+## Returning login errors to the client
+
+When a Steam login cannot be completed (for example the user takes too long and the login times out), the request fails with an HTTP 500 error by default. This is often fine: a reverse proxy in front of the service can catch the 500 and show a custom error page, and failed logins are easy to spot in logs and monitoring.
+
+If you would rather send the user back to the client (Keycloak or any other OpenID Connect client) with a standard error response instead, set `OpenId:ReturnErrorsToClient` in the appsettings.json or the `OpenId__ReturnErrorsToClient` environment variable to `true`. It defaults to `false`. When enabled, the user is redirected back to the client's redirect URI with an `error=temporarily_unavailable` response and the original `state`, so the client can show a message and let the user try again. If the original request cannot be determined, the login falls back to the HTTP 500 error.
 
 ## Health checks
 
